@@ -1,115 +1,97 @@
 #include "connections.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 // INCOMPLETE
-static int subscribe_on_invalid(const char *defname,
-                                struct sockaddr_storage *socket,
-                                socklen_t length, int i) {}
-// INCOMPLETE
-static int realloc_subscribers(void) {
-  subscribers.count++;
-
-  /* DEFNAME */
-
+int subscribe(int fd, const char *defname, struct sockaddr_storage *socket,
+              socklen_t length) {
   void *buffer = NULL;
+  count++;
   char cnt = 0;
   for (; cnt < 5; cnt++) {
-    void *buffer =
-        realloc(subscribers.defname, sizeof(char *) * subscribers.count);
+    buffer = realloc(subscribers, sizeof(Subscribers) * count);
     if (buffer != NULL)
       break;
   }
   if (buffer == NULL) {
-    subscribers.count--;
+    count--;
     return EXIT_FAILURE;
   }
-  subscribers.defname = buffer;
+  subscribers = buffer;
 
-  /* SOCKET */
-
-  buffer = NULL;
   for (cnt = 0; cnt < 5; cnt++) {
-    buffer = realloc(subscribers.socket,
-                     sizeof(struct sockaddr_storage) * subscribers.count);
-    if (buffer != NULL)
+    subscribers[count - 1].defname = strdup(defname);
+    if (subscribers[count - 1].defname != NULL)
       break;
   }
-  if (buffer == NULL) {
-    subscribers.count--;
-    subscribers.defname =
-        realloc(subscribers.defname, sizeof(char *) * subscribers.count);
+  if (subscribers[count - 1].defname == NULL) {
+
+    count--;
+    if (count == 0) {
+      free(subscribers);
+      subscribers = NULL;
+      return EXIT_FAILURE;
+    }
+
+    buffer = NULL;
+    for (cnt = 0; cnt < 5; cnt++) {
+      buffer = realloc(subscribers, sizeof(Subscribers) * count);
+      if (buffer != NULL)
+        break;
+    }
+    if (buffer == NULL) {
+      perror("realloc");
+      return EXIT_FAILURE;
+    }
+    subscribers = buffer;
     return EXIT_FAILURE;
   }
-  subscribers.socket = buffer;
 
-  /* LENGTH */
-
-  buffer = NULL;
-  for (cnt = 0; cnt < 5; cnt++) {
-    buffer = realloc(subscribers.length, sizeof(socklen_t) * subscribers.count);
-    if (buffer != NULL)
-      break;
-  }
-  if (buffer == NULL) {
-    subscribers.count--;
-    subscribers.defname =
-        realloc(subscribers.defname, sizeof(char *) * subscribers.count);
-    subscribers.socket =
-        realloc(subscribers.socket,
-                sizeof(struct sockaddr_storage) * subscribers.count);
-    return EXIT_FAILURE;
-  }
-  subscribers.length = buffer;
-
-  /* VALID */
-
-  buffer = NULL;
-  for (cnt = 0; cnt < 5; cnt++) {
-    buffer = realloc(subscribers.valid, sizeof(bool) * subscribers.count);
-    if (buffer != NULL)
-      break;
-  }
-  if (buffer == NULL) {
-    subscribers.count--;
-    subscribers.defname =
-        realloc(subscribers.defname, sizeof(char *) * subscribers.count);
-    subscribers.socket =
-        realloc(subscribers.socket,
-                sizeof(struct sockaddr_storage) * subscribers.count);
-    subscribers.length =
-        realloc(subscribers.length, sizeof(socklen_t) * subscribers.count);
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
-}
-
-static int subscribe_on_last(const char *defname,
-                             struct sockaddr_storage *socket,
-                             socklen_t length) {
-  if (realloc_subscribers() == 1)
-    return EXIT_FAILURE;
-
-  subscribers.defname[subscribers.count - 1] = strdup(defname);
+  memcpy(&subscribers[count - 1].socketAddress, socket, length);
+  subscribers[count - 1].length = length;
+  subscribers[count - 1].fd = fd;
 
   return EXIT_SUCCESS;
 }
 
 // INCOMPLETE
-int subscribe(const char *defname, struct sockaddr_storage *socket,
-              socklen_t length) {
-  for (int i = 0; i < subscribers.count; i++) {
-    if (subscribers.valid[i] == true)
+int unsubscribe(const char *defname) {
+  bool found = false;
+  for (size_t i = 0; i < count; i++) {
+    if (strcmp(subscribers[i].defname, defname) != 0)
       continue;
-    else
-      return subscribe_on_invalid(defname, socket, length, i);
+    found = true;
+    close(subscribers[i].fd);
+    free(subscribers[i].defname);
+    for (size_t j = i; j < count - 1; j++) {
+      subscribers[j] = subscribers[j + 1];
+    }
 
-    if (subscribers.count == (i + 1))
-      return subscribe_on_last(defname, socket, length);
+    count--;
+    if (count == 0) {
+      free(subscribers);
+      subscribers = NULL;
+      return EXIT_SUCCESS;
+    }
+
+    void *buffer;
+    for (char cnt = 0; cnt < 5; cnt++) {
+      buffer = NULL;
+      buffer = realloc(subscribers, sizeof(Subscribers) * count);
+      if (buffer != NULL)
+        break;
+    }
+    if (buffer == NULL) {
+      perror("realloc");
+      return EXIT_FAILURE;
+    }
+    subscribers = buffer;
+    break;
   }
-  return EXIT_SUCCESS;
+  if (found)
+    return EXIT_SUCCESS;
+  return EXIT_FAILURE;
 }
-
-// INCOMPLETE
-int unsubscribe(const char *defname) {}

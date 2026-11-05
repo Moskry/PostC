@@ -6,18 +6,13 @@
 #include <unistd.h>
 
 struct sockaddr_in6 server_addr;
-Subscribers subscribers;
+Subscribers *subscribers;
+size_t count;
 int server_fd;
 
-static int init_subscriber_list(void) {
-  subscribers.defname = calloc(1, sizeof(char *));
-  subscribers.length = calloc(1, sizeof(socklen_t));
-  subscribers.socket = calloc(1, sizeof(struct sockaddr_storage));
-  subscribers.valid = calloc(1, sizeof(bool));
-  subscribers.valid[0] = false;
-  if (subscribers.defname == NULL || subscribers.socket == NULL || subscribers.length == NULL)
-    return EXIT_FAILURE;
-  return EXIT_SUCCESS;
+static void init_subscriber_list(void) {
+  subscribers = NULL;
+  count = 0;
 }
 
 /* TESTS PENDING */
@@ -68,5 +63,6 @@ int init_server_socket(void) {
   }
 
   freeaddrinfo(result);
-  return init_subscriber_list();
+  init_subscriber_list();
+  return EXIT_SUCCESS;
 }
