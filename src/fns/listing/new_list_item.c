@@ -6,8 +6,7 @@
 
 MailingList *mailingList;
 
-/* COULD BE OPTIMIZED BASED ON MAIL */
-int new_list_item(Mail *mail) {
+static MailingList *new_list_item_default(void) {
   MailingList *new;
   char cnt = 0;
   for (; cnt < 5; cnt++) {
@@ -17,10 +16,32 @@ int new_list_item(Mail *mail) {
   }
   if (new == NULL) {
     perror("calloc");
-    return EXIT_FAILURE;
+    return NULL;
   }
 
-  for (cnt = 0; cnt < 5; cnt++) {
+  new->front = NULL;
+
+  return new;
+}
+static inline void assign_to_list(MailingList *new) {
+
+  if (mailingList == NULL)
+    mailingList = new;
+  else {
+    MailingList *item = mailingList;
+    for (; item->front != NULL; item = item->front)
+      ;
+    item->front = new;
+    item->front->back = item;
+  }
+}
+
+int new_list_item_clone(Mail *mail) {
+  MailingList *new = new_list_item_default();
+  if (new == NULL)
+    return EXIT_FAILURE;
+  char cnt = 0;
+  for (; cnt < 5; cnt++) {
     new->mail = calloc(1, sizeof(Mail));
     if (new->mail != NULL)
       break;
@@ -30,7 +51,6 @@ int new_list_item(Mail *mail) {
     perror("calloc");
     return EXIT_FAILURE;
   }
-  new->front = NULL;
 
   // memcpy(new->mail, mail, sizeof(Mail)); // Doesn't work properly
   for (cnt = 0; cnt < 5; cnt++) {
@@ -58,14 +78,19 @@ int new_list_item(Mail *mail) {
     return EXIT_FAILURE;
   }
 
-    if (mailingList == NULL)
-      mailingList = new;
-    else {
-      MailingList *item = mailingList;
-      for (; item->front != NULL; item = item->front)
-        ;
-      item->front = new;
-      item->front->back = item;
-    }
+  assign_to_list(new);
+
+  return EXIT_SUCCESS;
+}
+
+int new_list_item(Mail *mail) {
+  MailingList *new = new_list_item_default();
+  if (new == NULL)
+    return EXIT_FAILURE;
+  new->mail = mail;
+  mail = NULL;
+
+  assign_to_list(new);
+
   return EXIT_SUCCESS;
 }
