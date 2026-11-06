@@ -16,7 +16,7 @@ typedef struct ml {
 
 /* Public mailing list */
 extern MailingList *mailingList;
-extern MailingList *mailingListEnd;
+// extern MailingList *mailingListEnd;
 
 Mail *new_mail(const char *from, const char *to, const char *payload);
 
