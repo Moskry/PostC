@@ -1,6 +1,8 @@
 #ifndef _ACTIONS_H_
 #define _ACTIONS_H_
 
+#include <bits/pthreadtypes.h>
+
 /* GET */
 
 int handle_from(int cfd, char *buffer);
