@@ -1,5 +1,6 @@
 #include "connections.h"
+#include <stdlib.h>
 
 int init_epoll(void) {
- // TODO  
+  return EXIT_SUCCESS;
 }
