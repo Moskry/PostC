@@ -2,7 +2,6 @@
 #include "connections.h"
 #include "listing.h"
 #include "locker.h"
-#include "messaging.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,7 +41,7 @@ int handle_send(int cfd, char *buffer) {
 
   buffer += length;
 
-  memset(lenstr, NULL, sizeof(lenstr));
+  memset(lenstr, 0, sizeof(lenstr));
   memcpy(lenstr, buffer, 4);
 
   length = strtol(lenstr, NULL, 10);

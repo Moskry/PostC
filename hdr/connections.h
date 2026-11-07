@@ -42,6 +42,4 @@ int subscribe(int fd, const char *defname, struct sockaddr_storage *socket,
 
 /* The opposite of subscribing */
 int unsubscribe(const char *defname);
-
-int init_epoll(void);
 #endif

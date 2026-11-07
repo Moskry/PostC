@@ -6,12 +6,11 @@
 #define MAXMSGLEN 4096
 
 /* Messaging metadata protocol formats */
-#define SUBSCRIBE "%ld0009subscribe%d%s"
 #define UNSUBSCRIBE "%ld0011unsubscribe"
 #define REQUEST "%ld0004from%d%s"
 #define REQUEST_ALL "%ld0003all"
-#define RESPONSE "%ld0012responsefrom%d%s%d%s" // from %s to %s
-#define ACKNOWLEDGE "%ld0006served%d%s%d%s" // to %s payload %s
+#define RESPONSE "%04d0012responsefrom%04d%s%04d%s" // from %s to %s
+#define ACKNOWLEDGE "%04d0006served%04d%s%04d%s" // to %s payload %s
 #define SEND "%ld0004send%d%s%d%s" // to %s payload %s
 
 typedef enum { STRING, MAIL, ACKNOWLEDGEMENT } MessageType;

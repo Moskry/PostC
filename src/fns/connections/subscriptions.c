@@ -50,7 +50,8 @@ int subscribe(int fd, const char *defname, struct sockaddr_storage *socket,
     return EXIT_FAILURE;
   }
 
-  memcpy(&subscribers[count - 1].socketAddress, socket, length);
+  memcpy(&subscribers[count - 1].socketAddress, socket,
+         sizeof(subscribers[count - 1].socketAddress));
   subscribers[count - 1].length = length;
   subscribers[count - 1].fd = fd;
 
