@@ -7,7 +7,7 @@
 
 /* Messaging metadata protocol formats */
 #define SUBSCRIBE "0009subscribe%d%s"
-#define UNSUBSCRIBE "0011unsubscribe%d%s"
+#define UNSUBSCRIBE "0011unsubscribe"
 #define REQUEST "0004from%d%s"
 #define REQUEST_ALL "0003all"
 #define RESPONSE "0012responsefrom%d%s%d%s" // from %s to %s
@@ -16,7 +16,9 @@
 
 typedef enum { STRING, MAIL, ACKNOWLEDGEMENT } MessageType;
 
-int receive_from_client(int cfd, void *buffer, size_t n);
+int read_from(int cfd, char *buffer, size_t n);
+
+int receive_from_client(int cfd);
 
 int send_to_client(int cfd, void *data, size_t n, MessageType type);
 
