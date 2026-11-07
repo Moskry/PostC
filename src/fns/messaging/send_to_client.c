@@ -16,16 +16,20 @@ int send_to_client(int cfd, void *data, size_t n, MessageType type) {
 
   case MAIL:
     mail = data;
-    payload = calloc(strlen(mail->from) + strlen(mail->payload) + 32, sizeof(char));
-    sprintf(payload, RESPONSE, mail->from, mail->payload);
+    payload =
+        calloc(strlen(mail->from) + strlen(mail->payload) + 32, sizeof(char));
+    sprintf(payload, RESPONSE, (int)strlen(mail->from), mail->from,
+            (int)strlen(mail->payload), mail->payload);
     send(cfd, payload, strlen(payload), MSG_NOSIGNAL);
     free(payload);
     break;
 
   case ACKNOWLEDGEMENT:
     mail = data;
-    payload = calloc(strlen(mail->to) + strlen(mail->payload) + 32, sizeof(char));
-    sprintf(payload, ACKNOWLEDGE, mail->to, mail->payload);
+    payload =
+        calloc(strlen(mail->to) + strlen(mail->payload) + 32, sizeof(char));
+    sprintf(payload, ACKNOWLEDGE, (int)strlen(mail->to), mail->to,
+            (int)strlen(mail->payload), mail->payload);
     send(cfd, payload, strlen(payload), MSG_NOSIGNAL);
     free(payload);
     break;

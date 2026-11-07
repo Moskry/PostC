@@ -1,4 +1,6 @@
 #include "listing.h"
+#include "locker.h"
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +26,7 @@ static MailingList *new_list_item_default(void) {
   return new;
 }
 static inline void assign_to_list(MailingList *new) {
-
+  pthread_mutex_lock(&lock_global);
   if (mailingList == NULL)
     mailingList = new;
   else {
@@ -34,6 +36,7 @@ static inline void assign_to_list(MailingList *new) {
     item->front = new;
     item->front->back = item;
   }
+  pthread_mutex_unlock(&lock_global);
 }
 
 int new_list_item_clone(Mail *mail) {

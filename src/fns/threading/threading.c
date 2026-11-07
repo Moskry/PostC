@@ -1,5 +1,4 @@
 #include "threading.h"
-#include "actions.h"
 #include "locker.h"
 #include <pthread.h>
 #include <stdatomic.h>
@@ -30,6 +29,7 @@ static void *waiter(void *data) {
 
     pthread_mutex_unlock(&assign_lock);
     arg = &fd;
+    pthread_cond_signal(&data_funcs_condition);
     task_next(arg);
   }
 

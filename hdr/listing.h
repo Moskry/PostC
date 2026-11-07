@@ -16,7 +16,6 @@ typedef struct ml {
 
 /* Public mailing list */
 extern MailingList *mailingList;
-// extern MailingList *mailingListEnd;
 
 Mail *new_mail(const char *from, const char *to, const char *payload);
 
@@ -31,5 +30,8 @@ int pop_item(Mail **mail, int id);
 
 /* Free the mailing list object */
 int free_mailing_list(void);
+
+/* Free a mail object */
+void free_mail(Mail *mail);
 
 #endif

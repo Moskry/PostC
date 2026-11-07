@@ -1,6 +1,8 @@
 #include "actions.h"
 #include "connections.h"
+#include "locker.h"
 #include "messaging.h"
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,23 +25,43 @@ static int dispatch_to_handlers(int cfd, const char *request, char *buffer) {
 }
 
 int receive_from_client(int cfd) {
-  char buffer[2048] = {0};
+  char buffer[MAXMSGLEN] = {0};
+  char req[20] = {0};
 
+  pthread_mutex_lock(&lock_global);
   if (read_from(cfd, buffer, 4) != EXIT_SUCCESS) {
     perror("read_from");
+    pthread_mutex_unlock(&lock_global);
     return EXIT_FAILURE;
   }
 
-  size_t length = strtol(buffer, NULL, 10);
+  long length = strtol(buffer, NULL, 10);
+  if (length <= 0 || length > MAXMSGLEN) {
+    if (length <= 0) {
+      perror("length @ receive_from_client");
+      pthread_mutex_unlock(&lock_global);
+      return EXIT_FAILURE;
+    }
+    for (; length > MAXMSGLEN; length -= MAXMSGLEN)
+      read_from(cfd, buffer, MAXMSGLEN);
+    read_from(cfd, buffer, length);
+    pthread_mutex_unlock(&lock_global);
+    perror("length @ receive_from_client");
+  }
   char *buffer_position = &buffer[4];
 
-  char req[20] = {0};
   if (read_from(cfd, buffer_position, length) != EXIT_SUCCESS) {
     perror("read_from");
+    pthread_mutex_unlock(&lock_global);
     return EXIT_FAILURE;
   }
+  pthread_mutex_unlock(&lock_global);
+
+  char lenstr[5] = {0};
+  memcpy(lenstr, buffer_position, 4 * sizeof(char));
+  length = strtol(lenstr, NULL, 10);
 
   memcpy(req, buffer_position, length);
 
-  return dispatch_to_handlers(cfd, req, buffer_position + length);
+  return dispatch_to_handlers(cfd, req, buffer_position);
 }

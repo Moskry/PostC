@@ -10,10 +10,10 @@ int push_task(task t) {
   if (count == WAITING_MAX) {
     return EXIT_FAILURE;
   }
-  pthread_mutex_lock(&assign_lock);
+  pthread_mutex_lock(&data_funcs_lock);
   tasks[count] = t;
   atomic_fetch_add(&waiting_tasks_count, 1);
-  pthread_mutex_unlock(&assign_lock);
+  pthread_mutex_unlock(&data_funcs_lock);
   return EXIT_SUCCESS;
 }
 int push_arg(int fd) {
@@ -21,9 +21,9 @@ int push_arg(int fd) {
   if (count == WAITING_MAX) {
     return EXIT_FAILURE;
   }
-  pthread_mutex_lock(&assign_lock);
+  pthread_mutex_lock(&data_funcs_lock);
   arguments[count] = fd;
   atomic_fetch_add(&waiting_args_count, 1);
-  pthread_mutex_unlock(&assign_lock);
+  pthread_mutex_unlock(&data_funcs_lock);
   return EXIT_SUCCESS;
 }

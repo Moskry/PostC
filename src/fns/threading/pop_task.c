@@ -5,33 +5,33 @@
 #include <sys/types.h>
 
 task pop_task(void) {
-  uint count = atomic_load(&waiting_tasks_count);
-  if (count == 0) {
+  uint task_count = atomic_load(&waiting_tasks_count);
+  if (task_count == 0) {
     perror("Task array already empty");
     return NULL;
   }
-  pthread_mutex_lock(&assign_lock);
+  pthread_mutex_lock(&data_funcs_lock);
   task popped = tasks[0];
-  for (int i = 1; i < count; i++) {
+  for (int i = 1; i < task_count; i++) {
     tasks[i - 1] = tasks[i];
   }
   atomic_fetch_sub(&waiting_tasks_count, 1);
-  pthread_mutex_unlock(&assign_lock);
+  pthread_mutex_unlock(&data_funcs_lock);
   return popped;
 }
 
 int pop_arg(void) {
-  int count = atomic_load(&waiting_args_count);
-  if (count == 0) {
+  int args_count = atomic_load(&waiting_args_count);
+  if (args_count == 0) {
     perror("Args array already empty");
     return 0;
   }
-  pthread_mutex_lock(&assign_lock);
+  pthread_mutex_lock(&data_funcs_lock);
   int popped = arguments[0];
-  for (int i = 1; i < count; i++) {
+  for (int i = 1; i < args_count; i++) {
     arguments[i - 1] = arguments[i];
   }
   atomic_fetch_sub(&waiting_args_count, 1);
-  pthread_mutex_unlock(&assign_lock);
+  pthread_mutex_unlock(&data_funcs_lock);
   return popped;
 }
