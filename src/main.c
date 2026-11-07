@@ -14,7 +14,7 @@
 int main(int argc, char *argv[]) {
 
   struct epoll_event ev, events[MAX_EV];
-  int epollfd, nfds;
+  int client_fd, epollfd, nfds;
 
   epollfd = epoll_create1(0);
   if (epollfd == -1) {
@@ -24,9 +24,16 @@ int main(int argc, char *argv[]) {
 
   ev.events = EPOLLIN | EPOLLONESHOT;
 
+  if (init_locks() == EXIT_FAILURE) {
+    perror("init_locks");
+    return EXIT_FAILURE;
+  }
+
   if (argc != 2) {
     printf("Number of threads ommitted, default is 5.\n");
-  }
+    thread_pool_init(5);
+  } else
+    thread_pool_init(atoi(argv[1]));
 
   if (init_server_socket() == EXIT_FAILURE) {
     perror("init_server_socket");
@@ -53,16 +60,11 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < nfds; i++) {
       if (events[i].data.fd == server_fd) {
-        int client_fd =
+        addrlen = sizeof(struct sockaddr_in6);
+        client_fd =
             accept(server_fd, (struct sockaddr *)&client_sockaddr, &addrlen);
         if (client_fd == -1) {
           perror("accept");
-          status = EXIT_FAILURE;
-        }
-        ev.events = EPOLLIN | EPOLLONESHOT;
-        ev.data.fd = client_fd;
-        if (epoll_ctl(epollfd, EPOLL_CTL_ADD, client_fd, &ev) == -1) {
-          perror("epoll_ctl: client_fd");
           status = EXIT_FAILURE;
         }
         char service[NI_MAXSERV];
@@ -72,25 +74,40 @@ int main(int argc, char *argv[]) {
           fprintf(stderr, "getnameinfo: %s\n", gai_strerror(rc));
           exit(EXIT_FAILURE);
         } else {
+          char format[512] = {0};
+          sprintf(format, SUBSCRIBE, 4 + (int)strlen(service),
+                  (int)strlen(service), service);
+          send_to_client(client_fd, format, 8 + (int)strlen(service), STRING);
           subscribe(client_fd, service, &client_sockaddr, addrlen);
-        }
 
-        if (epoll_ctl(epollfd, EPOLL_CTL_ADD, server_fd, &ev) == -1) {
-          exit(EXIT_FAILURE);
+          ev.events = EPOLLIN | EPOLLONESHOT;
+          ev.data.fd = server_fd;
+          if (epoll_ctl(epollfd, EPOLL_CTL_MOD, server_fd, &ev) == -1) {
+            perror("epoll_ctl: server_fd");
+            status = EXIT_FAILURE;
+          }
+
+          ev.events = EPOLLIN | EPOLLONESHOT;
+          ev.data.fd = client_fd;
+          if (epoll_ctl(epollfd, EPOLL_CTL_ADD, client_fd, &ev) == -1) {
+            perror("epoll_ctl: client_fd");
+            status = EXIT_FAILURE;
+          }
         }
       } else {
         push_task((task)receive_from_client);
-        push_arg((events[i].data.fd));
+        push_arg(events[i].data.fd);
         pthread_cond_signal(&data_funcs_condition);
+        ev.events = EPOLLIN | EPOLLONESHOT;
+        ev.data.fd = client_fd;
+        if (epoll_ctl(epollfd, EPOLL_CTL_MOD, client_fd, &ev) == -1) {
+          perror("epoll_ctl: rearm");
+          EXIT_FAILURE;
+        }
       }
     }
   }
 
-  if (init_locks() == EXIT_FAILURE) {
-    perror("init_locks");
-    return EXIT_FAILURE;
-  }
-  
   destroy_locks();
 
   return EXIT_SUCCESS;

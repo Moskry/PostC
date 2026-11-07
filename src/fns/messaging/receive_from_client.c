@@ -24,13 +24,13 @@ static int dispatch_to_handlers(int cfd, const char *request, char *buffer) {
   return EXIT_FAILURE;
 }
 
-int receive_from_client(int cfd) {
+int receive_from_client(int *cfd) {
   char buffer[MAXMSGLEN] = {0};
   char req[20] = {0};
 
   pthread_mutex_lock(&lock_global);
-  if (read_from(cfd, buffer, 4) != EXIT_SUCCESS) {
-    perror("read_from");
+  if (read_from(*cfd, buffer, 4) != EXIT_SUCCESS) {
+    perror("read_from @1 receive_from_client");
     pthread_mutex_unlock(&lock_global);
     return EXIT_FAILURE;
   }
@@ -43,15 +43,15 @@ int receive_from_client(int cfd) {
       return EXIT_FAILURE;
     }
     for (; length > MAXMSGLEN; length -= MAXMSGLEN)
-      read_from(cfd, buffer, MAXMSGLEN);
-    read_from(cfd, buffer, length);
+      read_from(*cfd, buffer, MAXMSGLEN);
+    read_from(*cfd, buffer, length);
     pthread_mutex_unlock(&lock_global);
     perror("length @ receive_from_client");
   }
   char *buffer_position = &buffer[4];
 
-  if (read_from(cfd, buffer_position, length) != EXIT_SUCCESS) {
-    perror("read_from");
+  if (read_from(*cfd, buffer_position, length) != EXIT_SUCCESS) {
+    perror("read_from @2 receive_from_client");
     pthread_mutex_unlock(&lock_global);
     return EXIT_FAILURE;
   }
@@ -63,5 +63,5 @@ int receive_from_client(int cfd) {
 
   memcpy(req, buffer_position, length);
 
-  return dispatch_to_handlers(cfd, req, buffer_position);
+  return dispatch_to_handlers(*cfd, req, buffer_position);
 }

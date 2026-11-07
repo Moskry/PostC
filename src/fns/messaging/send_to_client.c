@@ -11,7 +11,7 @@ int send_to_client(int cfd, void *data, size_t n, MessageType type) {
   switch (type) {
 
   case STRING:
-    send(cfd, data, n, 0);
+    send(cfd, data, n, MSG_NOSIGNAL);
     break;
 
   case MAIL:
