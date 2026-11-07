@@ -1,10 +1,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "actions.h"
 #include "locker.h"
-
-pthread_mutex_t lock_global;
 
 int main(int argc, char *argv[]) {
   printf("Hello world!\n");

@@ -3,14 +3,16 @@
 
 #include <stddef.h>
 
+#define MAXMSGLEN 1024
+
 /* Messaging metadata protocol formats */
-#define SUBSCRIBE "subscribe %s\n"
-#define UNSUBSCRIBE "unsubscribe %s\n"
-#define REQUEST "from %s\n"
-#define REQUEST_ALL "all \n"
-#define RESPONSE "response from %s#payload#%s\n"
-#define ACKNOWLEDGE "served %s#payload#%s\n"
-#define SEND "send %s#payload#%s\n"
+#define SUBSCRIBE "0009subscribe%d%s"
+#define UNSUBSCRIBE "0011unsubscribe%d%s"
+#define REQUEST "0004from%d%s"
+#define REQUEST_ALL "0003all"
+#define RESPONSE "0012responsefrom%d%s%d%s" // from %s to %s
+#define ACKNOWLEDGE "0006served%d%s%d%s" // to %s payload %s
+#define SEND "0004send%d%s%d%s" // to %s payload %s
 
 typedef enum { STRING, MAIL, ACKNOWLEDGEMENT } MessageType;
 

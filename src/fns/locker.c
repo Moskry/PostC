@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+pthread_mutex_t assign_lock;
+pthread_mutex_t data_funcs_lock;
+pthread_mutex_t lock_global;
+pthread_cond_t data_funcs_condition;
+
 static int create_mutex(pthread_mutex_t *mtx) {
   for (char cnt = 0; cnt < 5; cnt++)
     if (pthread_mutex_init(mtx, NULL) == 0)
