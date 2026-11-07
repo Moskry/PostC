@@ -1,13 +1,12 @@
 #include "actions.h"
 #include "connections.h"
 #include "messaging.h"
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-/* REQUIRES FURTHER TESTING */
+/* NOT UNIT TESTED */
 
 static int dispatch_to_handlers(int cfd, const char *request, char *buffer) {
   if (strcmp(request, "unsubscribe") == 0) {

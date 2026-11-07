@@ -1,18 +1,31 @@
 #include "actions.h"
 #include "listing.h"
 #include "messaging.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 int handle_from(int cfd, char *buffer) {
-  char *newline = strstr(buffer, "\n");
-  char *name = strndup(buffer, newline - buffer);
+  if (read_from(cfd, buffer, 4) != EXIT_SUCCESS) {
+    perror("read_from @ handle_from");
+    return EXIT_FAILURE;
+  }
 
-  int count = 0;
-  int status;
+  int count = strtol(buffer, NULL, 10);
+  if (count <= 0 || count > 1024){
+    perror("count @ handle_from");
+    return EXIT_FAILURE;
+  }
+
+  buffer += 4;
+  if (read_from(cfd, buffer, count) != EXIT_SUCCESS) {
+    perror("read_from @ handle_from");
+    return EXIT_FAILURE;
+  }
+
   Mail *found;
   for (MailingList *item = mailingList; item != NULL; item = item->front) {
-    if (strcmp(item->mail->from, name) != 0)
+    if (strncmp(item->mail->from, buffer, count) != 0)
       continue;
     count++;
     int status = pop_item(&found, item->mail->id);
@@ -24,6 +37,5 @@ int handle_from(int cfd, char *buffer) {
   if (count == 0)
     return 404;
 
-  free(name);
   return EXIT_SUCCESS;
 }
