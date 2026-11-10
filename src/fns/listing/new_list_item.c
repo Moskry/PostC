@@ -94,6 +94,6 @@ int new_list_item(Mail *mail) {
   mail = NULL;
 
   assign_to_list(new);
-
+  fprintf(stderr, "new->mail->payload: %s\n", new->mail->payload);
   return EXIT_SUCCESS;
 }

@@ -29,7 +29,7 @@ int main(void) {
     return -1;
   }
 
-  for (rp = result; rp != NULL; rp->ai_next) {
+  for (rp = result; rp != NULL; rp = rp->ai_next) {
     sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
     if (sfd == -1)
       continue;
@@ -49,13 +49,15 @@ int main(void) {
 
   printf("received: %s\n", spot);
   char format[512] = {0};
-  int lengtha = length + 16 + 4;
-  sprintf(format, "%04d0004send%04d%s%04d%s", lengtha, length, spot, 4,
+  int lengtha = length + 16 + 5;
+  sprintf(format, "%04d0004send%s%04d%s", lengtha, spot, 4,
           "hello");
   send(sfd, format, strlen(format), MSG_NOSIGNAL);
   printf("sent: format: %s\n", format);
 
   char received[512] = {0};
+
+  send(sfd, "00070003all", strlen("00070003all"), MSG_NOSIGNAL);
   read(sfd, received, sizeof(received));
   printf("received: %s\n", received);
   exit(EXIT_SUCCESS);

@@ -70,8 +70,7 @@ int unsubscribe(const char *defname) {
     for (size_t j = i; j < count - 1; j++) {
       subscribers[j] = subscribers[j + 1];
     }
-
-    count--;
+count--;
     if (count == 0) {
       free(subscribers);
       subscribers = NULL;

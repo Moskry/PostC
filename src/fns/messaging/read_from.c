@@ -4,18 +4,18 @@
 #include <unistd.h>
 
 int read_from(int cfd, char *buffer, size_t n) {
-  int num_read = 0;
-  for (;;) {
-    num_read = read(cfd, buffer, n);
-    if (num_read == -1) {
-      if (errno == EINTR)
-        continue;
-      else
-        return EXIT_FAILURE;
-    } else
-      break;
+  size_t num_red = 0;
+
+  while (num_red < n) {
+    ssize_t r = read(cfd, buffer + num_red, n - num_red);
+
+    if (r > 0)
+      num_red += (size_t)r;
+    else if (r == 0)
+      return 2; // EOF
+    else if (errno != EINTR)
+      return EXIT_FAILURE; // read error
   }
-  if (num_read < n)
-    return 2; // Incorrect request
+
   return EXIT_SUCCESS;
 }

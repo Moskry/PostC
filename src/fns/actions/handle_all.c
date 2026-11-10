@@ -32,6 +32,7 @@ int handle_all(int cfd) {
   int count_found = 0;
 
   pthread_mutex_lock(&lock_global);
+
   for (MailingList *item = mailingList; item != NULL; item = item->front) {
 
     if (strcmp(item->mail->to, name) == 0) {
@@ -79,6 +80,7 @@ int handle_all(int cfd) {
       }
     }
   }
+
   pthread_mutex_unlock(&lock_global);
   if (count_found == 0)
     return 404;

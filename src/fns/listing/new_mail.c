@@ -27,7 +27,7 @@ Mail *new_mail(const char *from, const char *to, const char *payload) {
       break;
   }
   if (new == NULL) {
-    perror("malloc");
+    perror("malloc @ new_mail");
     return NULL;
   }
   if (clone(&new->from, from) == EXIT_FAILURE) {

@@ -22,6 +22,7 @@ int send_to_client(int cfd, void *data, size_t n, MessageType type) {
             (int)strlen(mail->from) + (int)strlen(mail->payload) + 24,
             (int)strlen(mail->from), mail->from, (int)strlen(mail->payload),
             mail->payload);
+    fprintf(stderr, "payload: %s\n", payload);
     send(cfd, payload, strlen(payload), MSG_NOSIGNAL);
     free(payload);
     break;

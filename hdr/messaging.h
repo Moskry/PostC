@@ -9,7 +9,7 @@
 #define SUBSCRIBE "%04d%04d%s"
 #define UNSUBSCRIBE "%00150011unsubscribe"
 #define REQUEST "%ld0004from%d%s"
-#define REQUEST_ALL "%ld0003all"
+#define REQUEST_ALL "00070003all"
 #define RESPONSE "%04d0012responsefrom%04d%s%04d%s" // from %s to %s
 #define ACKNOWLEDGE "%04d0006served%04d%s%04d%s" // to %s payload %s
 #define SEND "%04d0004send%d%s%d%s" // to %s payload %s
